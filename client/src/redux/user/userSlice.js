@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   currentUser: null,
   loading: false,
-  error: false,
+  error: null,
 };
 
 const userSlice = createSlice({
@@ -12,12 +12,12 @@ const userSlice = createSlice({
   reducers: {
     signInStart: (state) => {
       state.loading = true;
-      state.error = false;
+      state.error = null;
     },
     signInSuccess: (state, action) => {
       state.currentUser = action.payload;
       state.loading = false;
-      state.error = false;
+      state.error = null;
     },
     signInFailure: (state, action) => {
       state.error = action.payload;
@@ -25,12 +25,12 @@ const userSlice = createSlice({
     },
     updateUserStart: (state) => {
       state.loading = true;
-      state.error = false;
+      state.error = null;
     },
     updateUserSuccess: (state, action) => {
       state.currentUser = action.payload;
       state.loading = false;
-      state.error = false;
+      state.error = null;
     },
     updateUserFailure: (state, action) => {
       state.error = action.payload;
@@ -38,12 +38,12 @@ const userSlice = createSlice({
     },
     deleteUserStart: (state) => {
       state.loading = true;
-      state.error = false;
+      state.error = null;
     },
     deleteUserSuccess: (state) => {
       state.currentUser = null;
       state.loading = false;
-      state.error = false;
+      state.error = null;
     },
     deleteUserFailure: (state, action) => {
       state.error = action.payload;
@@ -52,7 +52,7 @@ const userSlice = createSlice({
     signOutUser: (state) => {
       state.currentUser = null;
       state.loading = false;
-      state.error = false;
+      state.error = null;
     },
   },
 });

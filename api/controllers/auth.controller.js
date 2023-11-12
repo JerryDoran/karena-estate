@@ -76,11 +76,9 @@ export async function signUpWithGoogle(req, res, next) {
         password: generatedPassword,
         profilePicture: req.body.photo,
       });
-      console.log(newUser);
 
       const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET);
-      console.log(token);
-
+      
       // Block password from being returned from the request for the client side
       const { password: hashedPasswordNewUser, ...rest } = newUser._doc;
 

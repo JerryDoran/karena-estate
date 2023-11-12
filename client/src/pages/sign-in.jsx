@@ -34,7 +34,6 @@ export default function SignInPage() {
 
   const { error } = useSelector((state) => state.user);
   console.log(error);
-  // const [error, setError] = useState(false);
 
   async function onSubmit(data) {
     try {
@@ -68,7 +67,6 @@ export default function SignInPage() {
       reset();
       navigate('/');
     } catch (error) {
-      console.log(error);
       dispatch(signInFailure(error));
     }
   }
