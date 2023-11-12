@@ -5,6 +5,7 @@ import SignUpPage from './pages/sign-up';
 import AboutPage from './pages/about';
 import ProfilePage from './pages/profile';
 import Header from './components/header';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path='/about' element={<AboutPage />} />
         <Route path='/profile' element={<ProfilePage />} />
       </Routes>
+      <Toaster />
     </BrowserRouter>
   );
 }

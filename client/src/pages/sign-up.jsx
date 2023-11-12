@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import OAuth from '../components/OAuth';
+import { toast } from 'react-hot-toast';
 
 const formSchema = z.object({
   username: z.string().min(4, 'Username must be at least 4 characters'),
@@ -49,9 +50,10 @@ export default function SignUpPage() {
         return;
       }
       reset();
+      toast.success('Successfully registered!');
       navigate('/sign-in');
     } catch (error) {
-      console.log(error);
+      toast.error('Oops! Something went wrong.');
     }
   }
 
