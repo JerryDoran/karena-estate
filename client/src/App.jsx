@@ -6,6 +6,7 @@ import AboutPage from './pages/about';
 import ProfilePage from './pages/profile';
 import Header from './components/header';
 import { Toaster } from 'react-hot-toast';
+import PrivateRoute from './components/private-route';
 
 function App() {
   return (
@@ -16,7 +17,9 @@ function App() {
         <Route path='/sign-in' element={<SignInPage />} />
         <Route path='/sign-up' element={<SignUpPage />} />
         <Route path='/about' element={<AboutPage />} />
-        <Route path='/profile' element={<ProfilePage />} />
+        <Route element={<PrivateRoute />}>
+          <Route path='/profile' element={<ProfilePage />} />
+        </Route>
       </Routes>
       <Toaster />
     </BrowserRouter>
