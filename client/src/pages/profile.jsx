@@ -1,106 +1,139 @@
 import { useSelector } from 'react-redux';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { toast } from 'react-hot-toast';
-
-const formSchema = z.object({
-  username: z.string().min(4, 'Username must be at least 4 characters'),
-  email: z.string().email(),
-  password: z.string().min(6, 'Password must be at least 6 characters'),
-});
+import { useEffect, useRef, useState } from 'react';
+import { storage } from '../firebase.config';
+import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 
 export default function ProfilePage() {
   const { currentUser } = useSelector((state) => state.user);
+  const fileRef = useRef();
+  const [file, setFile] = useState(undefined);
+  const [imagePercent, setImagePercent] = useState(0);
+  const [uploadError, setUploadError] = useState(false);
+  const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [formData, setFormData] = useState({});
 
-  const {
-    formState: { errors, isSubmitting },
-    register,
-    handleSubmit,
-    reset,
-  } = useForm({
-    defaultValues: {
-      username: '',
-      email: '',
-      password: '',
-    },
-    mode: 'all',
-    resolver: zodResolver(formSchema),
-  });
+  console.log(formData);
 
-  async function onSubmit(data) {
+  useEffect(() => {
+    if (file) {
+      handleFileUpload(file);
+    }
+  }, [file]);
+
+  async function handleFileUpload(image) {
+    setUploadError(false);
+    const fileName = new Date().getTime() + image.name; // creates unique file name
+    const storageRef = ref(storage, `images/${fileName}`);
+    const uploadTask = uploadBytesResumable(storageRef, image);
+    uploadTask.on(
+      'state_changed',
+      (snapshot) => {
+        const progress =
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        setImagePercent(Math.round(progress));
+      },
+      (error) => {
+        setUploadError(true);
+        toast.error('Image upload failed.');
+        console.log(error);
+      },
+      () => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) =>
+          setFormData({ ...formData, profilePicture: downloadURL })
+        );
+      }
+    );
+  }
+
+  function handleChange(e) {
+    setFormData({
+      ...formData,
+      [e.target.id]: e.target.value,
+    });
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
     try {
-      setError(false);
-      const res = await fetch('/api/auth/signup', {
+      // dispatch(updateUserStart());
+      const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       });
+      const data = await res.json();
 
-      const userData = await res.json();
-
-      if (userData.success === false) {
-        setError(true);
-        reset();
+      if (data.success === false) {
+        // dispatch(updateUserFailure(data));
         return;
       }
-      reset();
-      toast.success('Successfully registered!');
+      // dispatch(updateUserSuccess(data));
+      setUpdateSuccess(true);
     } catch (error) {
-      toast.error('Oops! Something went wrong.');
+      // dispatch(updateUserFailure(error));
     }
   }
 
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-4'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+        <input
+          type='file'
+          ref={fileRef}
+          hidden
+          accept='image/*'
+          onChange={(e) => setFile(e.target.files[0])}
+        />
         <img
-          src={currentUser.profilePicture}
+          src={formData.profilePicture || currentUser.profilePicture}
           alt='profile'
           className='rounded-full h-24 object-cover cursor-pointer self-center mt-2'
+          onClick={() => fileRef.current.click()}
         />
+        <p className='text-sm self-center'>
+          {uploadError ? (
+            <span className='text-red-600'>
+              Error uploading image (must be less than 2MB
+            </span>
+          ) : imagePercent > 0 && imagePercent < 100 ? (
+            <span className='text-slate-600'>{`Uploading: ${imagePercent}%`}</span>
+          ) : imagePercent === 100 ? (
+            <span className='text-green-600'>Image upload successful</span>
+          ) : (
+            ''
+          )}
+        </p>
         <input
           type='text'
           placeholder='Username'
           id='username'
           className='bg-white p-3 rounded-lg'
-          {...register('username')}
+          onChange={handleChange}
         />
-        {errors.username?.message && (
-          <p className='text-sm text-red-400 -mt-2'>
-            {errors.username.message}
-          </p>
-        )}
+
         <input
           type='email'
           placeholder='Email'
           id='email'
           className='bg-white p-3 rounded-lg'
-          {...register('email')}
+          onChange={handleChange}
         />
-        {errors.email?.message && (
-          <p className='text-sm text-red-400 -mt-2'>{errors.email.message}</p>
-        )}
+
         <input
           type='password'
           placeholder='Password'
           id='password'
           className='bg-white p-3 rounded-lg'
-          {...register('password')}
+          onChange={handleChange}
         />
-        {errors.password?.message && (
-          <p className='text-sm text-red-400 -mt-2'>
-            {errors.password.message}
-          </p>
-        )}
-        <button
-          disabled={isSubmitting}
-          className='bg-slate-700 text-white p-3 rounded-lg uppercase transition duration-250 hover:opacity-95 disabled:opacity-80'
-        >
-          {isSubmitting ? 'Loading...' : 'Update'}
+
+        <button className='bg-slate-700 text-white p-3 rounded-lg uppercase transition duration-250 hover:opacity-95 disabled:opacity-80'>
+          Update
+          {/* {loading ? 'Loading...' : 'Update'} */}
         </button>
       </form>
       <div className='flex justify-between pt-5'>
