@@ -1,19 +1,27 @@
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import { useEffect, useRef, useState } from 'react';
 import { storage } from '../firebase.config';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import {
+  updateUserStart,
+  updateUserFailure,
+  updateUserSuccess,
+  deleteUserStart,
+  deleteUserSuccess,
+  deleteUserFailure,
+  signOutUser,
+} from '../redux/user/userSlice';
 
 export default function ProfilePage() {
-  const { currentUser } = useSelector((state) => state.user);
+  const { currentUser, loading, error } = useSelector((state) => state.user);
   const fileRef = useRef();
   const [file, setFile] = useState(undefined);
   const [imagePercent, setImagePercent] = useState(0);
   const [uploadError, setUploadError] = useState(false);
   const [updateSuccess, setUpdateSuccess] = useState(false);
   const [formData, setFormData] = useState({});
-
-  console.log(formData);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (file) {
@@ -56,7 +64,8 @@ export default function ProfilePage() {
   async function handleSubmit(e) {
     e.preventDefault();
     try {
-      // dispatch(updateUserStart());
+      dispatch(updateUserStart());
+
       const res = await fetch(`/api/user/update/${currentUser._id}`, {
         method: 'POST',
         headers: {
@@ -65,15 +74,18 @@ export default function ProfilePage() {
         body: JSON.stringify(formData),
       });
       const data = await res.json();
-
+      console.log(data);
       if (data.success === false) {
-        // dispatch(updateUserFailure(data));
+        dispatch(updateUserFailure(data));
+        toast.error(error.error);
         return;
       }
-      // dispatch(updateUserSuccess(data));
+      dispatch(updateUserSuccess(data));
+      toast.success('Profile successfully updated');
       setUpdateSuccess(true);
     } catch (error) {
-      // dispatch(updateUserFailure(error));
+      toast.error('Could not update your profile information.');
+      dispatch(updateUserFailure(error));
     }
   }
 
@@ -113,6 +125,7 @@ export default function ProfilePage() {
           id='username'
           className='bg-white p-3 rounded-lg'
           onChange={handleChange}
+          defaultValue={currentUser.username}
         />
 
         <input
@@ -121,6 +134,7 @@ export default function ProfilePage() {
           id='email'
           className='bg-white p-3 rounded-lg'
           onChange={handleChange}
+          defaultValue={currentUser.email}
         />
 
         <input
@@ -131,18 +145,19 @@ export default function ProfilePage() {
           onChange={handleChange}
         />
 
-        <button className='bg-slate-700 text-white p-3 rounded-lg uppercase transition duration-250 hover:opacity-95 disabled:opacity-80'>
-          Update
-          {/* {loading ? 'Loading...' : 'Update'} */}
+        <button
+          disabled={loading}
+          className='bg-slate-700 text-white p-3 rounded-lg uppercase transition duration-250 hover:opacity-95 disabled:opacity-80'
+        >
+          {loading ? 'Loading...' : 'Update'}
         </button>
       </form>
       <div className='flex justify-between pt-5'>
         <span className='text-red-700 cursor-pointer'>Delete Account</span>
         <span className='text-red-700 cursor-pointer'>Sign out</span>
       </div>
-      {/* <p className='text-red-700 mt-5'>
-        {error && 'Oops something went wrong!'}
-      </p> */}
+      {/* <p className='text-red-700 mt-5'>{error ? error.error : ''}</p> */}
+      {/* <p className='text-green-700 mt-5'>{updateSuccess ? 'User successfully updated' : ''}</p> */}
     </div>
   );
 }

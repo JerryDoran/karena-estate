@@ -33,6 +33,7 @@ const userSlice = createSlice({
       state.error = null;
     },
     updateUserFailure: (state, action) => {
+      
       state.error = action.payload;
       state.loading = false;
     },
