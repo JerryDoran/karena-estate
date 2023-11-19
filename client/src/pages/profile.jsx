@@ -111,6 +111,17 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleSignout() {
+    try {
+      await fetch('/api/auth/signout');
+      dispatch(signOutUser());
+      toast.success('You are signed out.');
+    } catch (error) {
+      console.log(error);
+      toast.error('Something went wrong.');
+    }
+  }
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -181,7 +192,9 @@ export default function ProfilePage() {
         >
           Delete Account
         </span>
-        <span className='text-red-700 cursor-pointer'>Sign out</span>
+        <span onClick={handleSignout} className='text-red-700 cursor-pointer'>
+          Sign out
+        </span>
       </div>
       {/* <p className='text-red-700 mt-5'>{error ? error.error : ''}</p> */}
       {/* <p className='text-green-700 mt-5'>{updateSuccess ? 'User successfully updated' : ''}</p> */}
