@@ -89,6 +89,28 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleDeleteAccount() {
+    try {
+      dispatch(deleteUserStart());
+      const res = await fetch(`/api/user/delete/${currentUser._id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+
+      if (data.success === false) {
+        toast.error(data.error);
+        return;
+      }
+
+      dispatch(deleteUserSuccess(data));
+      toast.success('Your account has been deleted.');
+    } catch (error) {
+      dispatch(deleteUserFailure(error));
+      console.log(error);
+      toast.error('Something went wrong.');
+    }
+  }
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -153,7 +175,12 @@ export default function ProfilePage() {
         </button>
       </form>
       <div className='flex justify-between pt-5'>
-        <span className='text-red-700 cursor-pointer'>Delete Account</span>
+        <span
+          onClick={handleDeleteAccount}
+          className='text-red-700 cursor-pointer'
+        >
+          Delete Account
+        </span>
         <span className='text-red-700 cursor-pointer'>Sign out</span>
       </div>
       {/* <p className='text-red-700 mt-5'>{error ? error.error : ''}</p> */}
