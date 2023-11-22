@@ -7,6 +7,7 @@ import ProfilePage from './pages/profile';
 import Header from './components/header';
 import { Toaster } from 'react-hot-toast';
 import PrivateRoute from './components/private-route';
+import CreateListingPage from './pages/create-listing';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path='/about' element={<AboutPage />} />
         <Route element={<PrivateRoute />}>
           <Route path='/profile' element={<ProfilePage />} />
+          <Route path='/create-listing' element={<CreateListingPage />} />
         </Route>
       </Routes>
       <Toaster />
