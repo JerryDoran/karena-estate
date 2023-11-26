@@ -32,19 +32,19 @@ const listingSchema = new mongoose.Schema(
     },
     furnished: {
       type: Boolean,
-      required: [true, 'Please enter if the listing is furnished'],
+      required: true,
     },
     parking: {
       type: Boolean,
-      required: [true, 'Please enter if there is parking available'],
+      required: true,
     },
     type: {
       type: String,
-      required: [true, 'Please enter if the listing is for sale or rent'],
+      required: true,
     },
     offer: {
       type: Boolean,
-      required: [true, 'Please enter if the listing has an offer'],
+      required: true,
     },
     imageUrls: {
       type: Array,
