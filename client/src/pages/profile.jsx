@@ -3,6 +3,7 @@ import { toast } from 'react-hot-toast';
 import { useEffect, useRef, useState } from 'react';
 import { storage } from '../firebase.config';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import { Link } from 'react-router-dom';
 import {
   updateUserStart,
   updateUserFailure,
@@ -12,7 +13,7 @@ import {
   deleteUserFailure,
   signOutUser,
 } from '../redux/user/userSlice';
-import { Link } from 'react-router-dom';
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 export default function ProfilePage() {
   const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -20,7 +21,8 @@ export default function ProfilePage() {
   const [file, setFile] = useState(undefined);
   const [imagePercent, setImagePercent] = useState(0);
   const [uploadError, setUploadError] = useState(false);
-  const [updateSuccess, setUpdateSuccess] = useState(false);
+  // const [updateSuccess, setUpdateSuccess] = useState(false);
+  const [userListings, setUserListings] = useState([]);
   const [formData, setFormData] = useState({});
   const dispatch = useDispatch();
 
@@ -83,7 +85,7 @@ export default function ProfilePage() {
       }
       dispatch(updateUserSuccess(data));
       toast.success('Profile successfully updated');
-      setUpdateSuccess(true);
+      // setUpdateSuccess(true);
     } catch (error) {
       toast.error('Could not update your profile information.');
       dispatch(updateUserFailure(error));
@@ -120,6 +122,25 @@ export default function ProfilePage() {
     } catch (error) {
       console.log(error);
       toast.error('Something went wrong.');
+    }
+  }
+
+  async function handleShowListings() {
+    try {
+      const response = await fetch(`/api/user/listings/${currentUser._id}`);
+      const data = await response.json();
+      console.log(data);
+
+      if (data.success === false) {
+        toast.error('Could not fetch your listings');
+        return;
+      }
+
+      setUserListings(data);
+      console.log(userListings);
+    } catch (error) {
+      console.log(error);
+      toast.error('Could not display your listings');
     }
   }
 
@@ -205,6 +226,41 @@ export default function ProfilePage() {
       </div>
       {/* <p className='text-red-700 mt-5'>{error ? error.error : ''}</p> */}
       {/* <p className='text-green-700 mt-5'>{updateSuccess ? 'User successfully updated' : ''}</p> */}
+      <div className='w-full flex justify-center p-5'>
+        <button
+          className='text-white text-sm hover:opacity-90 bg-green-700 rounded-md w-fit py-2 px-3 text-center'
+          onClick={handleShowListings}
+        >
+          Show Listings
+        </button>
+      </div>
+      <div className='pt-10'>
+        <h1 className='font-semibold text-xl pb-2'>Your Listings</h1>
+        {userListings &&
+          userListings.length > 0 &&
+          userListings.map((listing) => (
+            <div
+              key={listing._id}
+              className='flex justify-between items-center space-x-5 border p-3'
+            >
+              <Link
+                to={`/listing/${listing._id}`}
+                className='flex items-center gap-10 w-full'
+              >
+                <img
+                  src={listing.imageUrls[0]}
+                  alt='listing cover'
+                  className='w-24 object-contain rounded-md'
+                />
+                <p className='font-semibold flex-1 hover:underline truncate'>
+                  {listing.title}
+                </p>
+              </Link>
+              <FaTrash className='cursor-pointer text-gray-700' />
+              <FaEdit className='cursor-pointer text-gray-700' />
+            </div>
+          ))}
+      </div>
     </div>
   );
 }
