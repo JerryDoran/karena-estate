@@ -144,6 +144,28 @@ export default function ProfilePage() {
     }
   }
 
+  async function handleDelete(listingId) {
+    try {
+      const response = await fetch(`/api/listing/delete/${listingId}`, {
+        method: 'DELETE',
+      });
+      const data = await response.json();
+      if (data.success === false) {
+        console.log(data.message);
+        toast.error(data.message);
+        return;
+      }
+
+      setUserListings((prev) =>
+        prev.filter((listing) => listing._id !== listingId)
+      );
+      toast.success('Listing has been deleted');
+    } catch (error) {
+      toast.error('Could not delete listing');
+      console.log(error);
+    }
+  }
+
   return (
     <div className='p-3 max-w-lg mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>Profile</h1>
@@ -256,8 +278,13 @@ export default function ProfilePage() {
                   {listing.title}
                 </p>
               </Link>
-              <FaTrash className='cursor-pointer text-gray-700' />
-              <FaEdit className='cursor-pointer text-gray-700' />
+              <div className='flex items-center gap-6'>
+                <FaTrash
+                  onClick={() => handleDelete(listing._id)}
+                  className='cursor-pointer transition text-gray-500 hover:text-gray-700'
+                />
+                <FaEdit className='h-5 w-5 cursor-pointer transition text-gray-500 hover:text-gray-700' />
+              </div>
             </div>
           ))}
       </div>
