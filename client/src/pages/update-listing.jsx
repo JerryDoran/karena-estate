@@ -1,12 +1,13 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { storage } from '../firebase.config';
 import { getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import { toast } from 'react-hot-toast';
 import { useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
-export default function CreateListingPage() {
+export default function UpdateListingPage() {
   const navigate = useNavigate();
+  const params = useParams();
   const { currentUser } = useSelector((state) => state.user);
   const [files, setFiles] = useState([]);
   const [imageUploadError, setImageUploadError] = useState(false);
@@ -27,6 +28,25 @@ export default function CreateListingPage() {
     parking: false,
     furnished: false,
   });
+
+  useEffect(() => {
+    async function fetchListing() {
+      const listingId = params.listingId;
+
+      const response = await fetch(`/api/listing/get/${listingId}`);
+
+      const data = await response.json();
+
+      if (data.success === false) {
+        console.log(data.message);
+        return;
+      }
+
+      setFormData(data);
+    }
+
+    fetchListing();
+  }, []);
 
   function handleFileUpload() {
     if (files.length > 0 && files.length + formData.imageUrls.length < 7) {
@@ -138,8 +158,8 @@ export default function CreateListingPage() {
       setLoading(true);
       setError(false);
 
-      const response = await fetch('/api/listing/create', {
-        method: 'POST',
+      const response = await fetch(`/api/listing/update/${params.listingId}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -169,7 +189,7 @@ export default function CreateListingPage() {
   return (
     <main className='p-3 max-w-4xl mx-auto'>
       <h1 className='text-3xl font-semibold text-center my-7'>
-        Create a Listing
+        Update Listing
       </h1>
       <form onSubmit={handleSubmit} className='flex flex-col sm:flex-row gap-6'>
         <div className='flex flex-col gap-4 flex-1'>
@@ -369,7 +389,7 @@ export default function CreateListingPage() {
             disabled={loading || imageLoading}
             className='p-3 mt-2 bg-slate-700 text-white rounded-lg uppercase transition hover:opacity-90 disabled:opacity-80'
           >
-            {loading ? 'Creating Listing...' : 'Create Listing'}
+            {loading ? 'Updating Listing...' : 'Update Listing'}
           </button>
           {error && <p className='text-red-700 text-sm'>{error}</p>}
         </div>

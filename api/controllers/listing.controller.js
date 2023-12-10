@@ -31,7 +31,7 @@ export async function deleteListing(req, res, next) {
 
 export async function updateListing(req, res, next) {
   const listing = await Listing.findById(req.params.id);
-  
+
   if (!listing) {
     return next(errorHandler('404, Listing not found'));
   }
@@ -47,6 +47,20 @@ export async function updateListing(req, res, next) {
       { new: true } // returns the new updated listing
     );
     res.status(200).json(updatedListing);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getListing(req, res, next) {
+  console.log(req);
+  try {
+    const listing = await Listing.findById(req.params.id);
+
+    if (!listing) {
+      return next(errorHandler('404, Listing not found'));
+    }
+    res.status(200).json(listing);
   } catch (error) {
     next(error);
   }

@@ -283,7 +283,9 @@ export default function ProfilePage() {
                   onClick={() => handleDelete(listing._id)}
                   className='cursor-pointer transition text-gray-500 hover:text-gray-700'
                 />
-                <FaEdit className='h-5 w-5 cursor-pointer transition text-gray-500 hover:text-gray-700' />
+                <Link to={`/update-listing/${listing._id}`}>
+                  <FaEdit className='h-5 w-5 cursor-pointer transition text-gray-500 hover:text-gray-700' />
+                </Link>
               </div>
             </div>
           ))}
