@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import LoadingSpinner from '../components/loading-spinner';
+import ListingCard from '../components/listing-card';
 
 export default function SearchPage() {
   const [loading, setLoading] = useState(false);
@@ -14,8 +16,6 @@ export default function SearchPage() {
     order: 'desc',
   });
   const navigate = useNavigate();
-
-  console.log(listings);
 
   useEffect(() => {
     const urlParams = new URLSearchParams(location.search);
@@ -220,10 +220,21 @@ export default function SearchPage() {
           </button>
         </form>
       </div>
-      <div className=''>
+      <div className='flex-1'>
         <h1 className='text-3xl font-semibold border-b p-3 text-slate-700 mt-5'>
           Listing Results:
         </h1>
+        <div className='p-7 flex flex-wrap gap-5'>
+          {!loading && listings.length === 0 && (
+            <p className='text-lg text-slate-500 w-full'>No listings found</p>
+          )}
+          {loading && (
+            <div className='text-center w-full'>
+              <LoadingSpinner />
+            </div>
+          )}
+          {!loading && listings?.map((listing) => <ListingCard key={listing._id} listing={listing} />)}
+        </div>
       </div>
     </div>
   );
