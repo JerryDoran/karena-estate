@@ -6,6 +6,7 @@ import ListingCard from '../components/listing-card';
 export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [listings, setListings] = useState([]);
+  const [showMore, setShowMore] = useState(false);
   const [sidebarData, setSidebarData] = useState({
     searchTerm: '',
     type: 'all',
@@ -50,11 +51,19 @@ export default function SearchPage() {
 
     async function getListings() {
       setLoading(true);
+      setShowMore(false);
 
       const searchQuery = urlParams.toString();
 
       const response = await fetch(`/api/listing/get?${searchQuery}`);
       const data = await response.json();
+
+      if (data.length > 8) {
+        setShowMore(true);
+      } else {
+        setShowMore(false);
+      }
+
       setListings(data);
       setLoading(false);
     }
@@ -118,6 +127,22 @@ export default function SearchPage() {
     const searchQuery = urlParams.toString();
 
     navigate(`/search?${searchQuery}`);
+  }
+
+  async function handleShowMore() {
+    const numberofListings = listings.length;
+    const startIndex = numberofListings;
+    const urlParams = new URLSearchParams(location.search);
+    urlParams.set('startIndex', startIndex);
+    const searchQuery = urlParams.toString();
+    const response = await fetch(`/api/listing/get?${searchQuery}`);
+    const data = await response.json();
+
+    if (data.length < 9) {
+      setShowMore(false);
+    }
+
+    setListings([...listings, ...data]);
   }
 
   return (
@@ -233,8 +258,19 @@ export default function SearchPage() {
               <LoadingSpinner />
             </div>
           )}
-          {!loading && listings?.map((listing) => <ListingCard key={listing._id} listing={listing} />)}
+          {!loading &&
+            listings?.map((listing) => (
+              <ListingCard key={listing._id} listing={listing} />
+            ))}
         </div>
+        {showMore && (
+          <button
+            className='text-green-700 hover:underline pb-7 text-center w-full'
+            onClick={handleShowMore}
+          >
+            Show More
+          </button>
+        )}
       </div>
     </div>
   );
