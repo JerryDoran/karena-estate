@@ -4,7 +4,7 @@ import { MdLocationOn } from 'react-icons/md';
 /* eslint-disable react/prop-types */
 export default function ListingCard({ listing }) {
   return (
-    <div className='bg-white shadow-md rounded-lg hover:shadow-lg transition-shadow duration-300 overflow-hidden w-full sm:w-[330px]'>
+    <div className='bg-white shadow-md rounded-lg hover:shadow-lg transition-shadow duration-300 overflow-hidden w-full sm:w-[300px]'>
       <Link to={`/listing/${listing._id}`}>
         <img
           src={listing.imageUrls[0]}
